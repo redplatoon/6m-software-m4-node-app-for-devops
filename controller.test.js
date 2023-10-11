@@ -7,13 +7,14 @@ describe("the print function", ()=>{
         jest.clearAllMocks();
     })
 
-    it("should respond with 'Hello world!'", ()=>{
+    it("should respond with 'Hello I'm BQ! I have deployed my APP to Heroku'", ()=>{
         const mockReq = {};
         const mockRes = {
             send:jest.fn()
         }
 
         targetFn(mockReq, mockRes);
-        expect(mockRes.send).toHaveBeenCalledWith("Hello world!"); // If you change this value, the test will fail.
+        expect(mockRes.send).toHaveBeenCalledWith("Hello I'm BQ! I have deployed my APP to Heroku");
     })
 })
+
