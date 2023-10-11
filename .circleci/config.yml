@@ -2,6 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4 #Allows us to use the docker commands
+  heroku: circleci/heroku@2.0.0 #allows
 jobs:
   build:
     docker:
@@ -36,6 +37,22 @@ jobs:
           image: redplatoon/education-space
           tag: 1.0.1
 
+  deploy:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - setup_remote_docker
+      - heroku/install #installs heroku cli for our run command
+      - checkout
+      - run
+        name: Heroku Container Push #the name of the group of commands we are running
+        command: |
+          heroku container:login
+          heroku container:push web -a bingquan-su-devops
+          heroku container:release web -a bingquan-su-devops
+        #the push command pushes the image to heroku's container registry
+        #the release command deploys the image from heroku's container registry
+
 workflows:
   simple_workflow:
     jobs:
@@ -46,3 +63,6 @@ workflows:
       - build-and-push:
           requires:
             - test
+      - deploy:
+          requires:
+            - build-and-push
