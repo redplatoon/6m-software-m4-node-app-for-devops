@@ -12,9 +12,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          name: Installing dependencies
-          command: npm install
+      - run: |
+          echo "Installing dependencies..."
+          npm install
   test:
     docker:
       - image: cimg/node:16.10
@@ -22,9 +22,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          name: Running tests
-          command: npm run test
+      - run: |
+          echo "Running tests..."
+          npm run test
   build-and-push:
     executor: docker/docker 
     parameters:
@@ -49,23 +49,24 @@ jobs:
       - checkout
       - setup_remote_docker
       - docker/check
-      - run:
-          name: Build Docker image
-          command: docker build -t $IMAGE_NAME .
+      - run: docker build -t $IMAGE_NAME . 
+      # $IMAGE_NAME gets the value of the IMAGE_NAME from the environment defined above.
       - snyk/scan:
           docker-image-name: $IMAGE_NAME
 
 workflows:
   simple_workflow:
     jobs:
-      - build
-      - test:
+      - build #1st job
+      - test: #2nd job
           requires:
             - build
-      - build-and-push:
+      - build-and-push: #3rd job
           requires:
             - test
-          tag: "latest" # or any other tag you want to use
+      # - deploy:
+      #     requires:
+      #       - build-and-push
       - scan:
           requires:
             - build
