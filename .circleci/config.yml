@@ -63,6 +63,7 @@ workflows:
       - build-and-push:
           requires:
             - test
+          tag: "latest" # or any other tag you want to use
       - scan:
           requires:
             - build-and-push
