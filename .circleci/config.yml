@@ -12,9 +12,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo "Installing dependencies..."
-          npm install
+      - run:
+          name: Installing dependencies
+          command: npm install
   test:
     docker:
       - image: cimg/node:16.10
@@ -22,9 +22,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo "Running tests..."
-          npm run test
+      - run:
+          name: Running tests
+          command: npm run test
   build-and-push:
     executor: docker/docker 
     parameters:
@@ -40,20 +40,34 @@ jobs:
       - docker/push:
           image: redplatoon/education-space
           tag: << parameters.tag >>
-    scan:
-      docker:
-        - image: cimg/node:16.10
-      environment:
-        IMAGE_NAME: redplatoon/education-space
-      steps:
-        - checkout
-        - setup_remote_docker
-        - docker/check
-        - run: docker build -t $IMAGE_NAME .
-        # $IMAGE_NAME gets the value of the IMAGE_NAME from the environment defined above
-        - snyk/scan:
+  scan:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME .
+      - snyk/scan:
           docker-image-name: $IMAGE_NAME
-  
+
+workflows:
+  simple_workflow:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - build-and-push:
+          requires:
+            - test
+      - scan:
+          requires:
+            - build-and-push
+
+
   # deploy:
   #   docker:
   #     - image: cimg/node:16.10
@@ -68,19 +82,6 @@ jobs:
   #           heroku container:push web -a bingquan-su-devops
   #           heroku container:release web -a bingquan-su-devops
 
-workflows:
-  simple_workflow:
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
-      - build-and-push:
-          requires:
-            - test
-      - scan:
-          requires:
-            - build
 
 # workflows:
 #   version: 2
