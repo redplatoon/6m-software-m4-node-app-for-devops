@@ -43,6 +43,8 @@ jobs:
   scan:
     docker:
       - image: cimg/node:16.10
+    environment:
+      IMAGE_NAME: redplatoon/education-space
     steps:
       - checkout
       - setup_remote_docker
@@ -66,7 +68,7 @@ workflows:
           tag: "latest" # or any other tag you want to use
       - scan:
           requires:
-            - build-and-push
+            - build
 
 
   # deploy:
